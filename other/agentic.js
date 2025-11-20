@@ -1,20 +1,26 @@
+import { OPENAI_API_KEY } from './env.js';
+
+let tap = x => (console.log(x), x);
+
 export default async function agentic(model, messages, tools) {
   async function step() {
+    let ctools = buildCleanTools(tools);
     await new Promise(pres => setTimeout(pres, 1000));
-
-    console.log(JSON.stringify(messages.slice(-4), null, 2));
     const response = await fetch("https://api.openai.com/v1/responses", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ???`,
+        Authorization: `Bearer ${OPENAI_API_KEY}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
+      body: JSON.stringify(tap({
         model,
-        input: messages,
-        tools: buildCleanTools(tools),
+        input: messages.map(x => {
+          if (typeof x.content === 'function') return { ...x, content: x.content() };
+          return x;
+        }),
+        tools: ctools,
         tool_choice: "auto",
-      }),
+      })),
     });
 
     const data = await response.json();
@@ -35,7 +41,7 @@ export default async function agentic(model, messages, tools) {
             ? JSON.parse(call.arguments)
             : call.arguments;
 
-          const tool = tools.find(t => t.name === call.name);
+            const tool = tools().filter(Boolean).find(t => t.name === call.name);
 
           if (!tool) {
             messages.push({
@@ -46,8 +52,8 @@ export default async function agentic(model, messages, tools) {
           }
 
           // 🧠 EXECUTE TOOL HANDLER
-          //console.log('call:', call.name, args);
           let result = await tool.handler(args);
+          console.log('call:', call.name, args, 'res:', result);
 
           // -----------------------------------------
           // 🛑 SPECIAL EXIT SIGNAL
@@ -97,7 +103,7 @@ export default async function agentic(model, messages, tools) {
 }
 
 function buildCleanTools(toolsWithHandlers) {
-  return toolsWithHandlers.map(t => {
+  return toolsWithHandlers().filter(Boolean).map(t => {
     return JSON.parse(
       JSON.stringify(
         {

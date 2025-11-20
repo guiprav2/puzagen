@@ -20,19 +20,20 @@
     style="display: none"
   >
     <div
-      class="flex flex-col items-center gap-6 w-full"
       wf-onattach="post('game.init')"
+      class="flex flex-col items-center gap-6 w-full"
     >
-      <div class="flex justify-center items-center h-96">
+      <div class="flex justify-center items-center h-96 scale-150">
         <div class="grid grid-cols-11 relative">
           <div
             class="w-[32px] h-[32px] bg-fit"
             style="background-image: url('../media/grass.png')"
           >
             <img
-              class="absolute w-[32px] h-[32px]"
-              src="../media/char.png"
-              wf-class="{{`left-[${state.game.char.x * 32}px]`}} {{`top-[${state.game.char.y * 32}px]`}}"
+              class="aspect-square hidden absolute w-[32px] h-[32px]"
+              wf-src="x.img()"
+              wf-map="x of Object.values(state.game.objects)"
+              wf-class="{{replaces hidden: 'block'}} {{`left-[${(Number(x.coords.split('x')[0]) - 1) * 32}px]`}} {{`top-[${(Number(x.coords.split('x')[1]) - 1) * 32}px]`}}"
             />
           </div>
           <div
@@ -98,12 +99,6 @@
           <div
             style="background-image: url('../media/grass.png')"
             class="w-[32px] h-[32px] bg-fit"
-          >
-            <img class="" src="../media/door.png" />
-          </div>
-          <div
-            style="background-image: url('../media/grass.png')"
-            class="w-[32px] h-[32px] bg-fit"
           ></div>
           <div
             style="background-image: url('../media/grass.png')"
@@ -172,6 +167,18 @@
           <div
             style="background-image: url('../media/grass.png')"
             class="w-[32px] h-[32px] bg-fit"
+          ></div>
+          <div
+            style="background-image: url('../media/grass.png')"
+            class="w-[32px] h-[32px] bg-fit"
+          ></div>
+          <div
+            style="background-image: url('../media/grass.png')"
+            class="w-[32px] h-[32px] bg-fit"
+          ></div>
+          <div
+            style="background-image: url('../media/grass.png')"
+            class="w-[32px] h-[32px] bg-fit flex items-center justify-center"
           ></div>
           <div
             style="background-image: url('../media/grass.png')"
@@ -180,39 +187,7 @@
           <div
             style="background-image: url('../media/grass.png')"
             class="w-[32px] h-[32px] bg-fit flex items-center justify-center"
-          >
-            <button
-              class="w-full h-full flex items-center justify-center bg-transparent"
-              wf-onclick="post('game.attemptClick', '3x3')"
-              wf-class="{{Math.abs(state.game.char.x - 3) &lt;= state.game.interactionRange &amp;&amp; Math.abs(state.game.char.y - 3) &lt;= state.game.interactionRange ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'}}"
-              type="button"
-              value=""
-            >
-              <img
-                class="pointer-events-none"
-                src="../media/closest_chest.png"
-                wf-src="state.game.chest"
-              />
-            </button>
-          </div>
-          <div
-            style="background-image: url('../media/grass.png')"
-            class="w-[32px] h-[32px] bg-fit"
           ></div>
-          <div
-            style="background-image: url('../media/grass.png')"
-            class="w-[32px] h-[32px] bg-fit flex items-center justify-center"
-          >
-            <button
-              class="w-full h-full flex items-center justify-center bg-transparent"
-              wf-onclick="post('game.attemptClick', '5x3')"
-              wf-class="{{Math.abs(state.game.char.x - 5) &lt;= state.game.interactionRange &amp;&amp; Math.abs(state.game.char.y - 3) &lt;= state.game.interactionRange ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'}}"
-              value=""
-              type="button"
-            >
-              <img class="pointer-events-none" src="../media/carpet.png" />
-            </button>
-          </div>
           <div
             style="background-image: url('../media/grass.png')"
             class="w-[32px] h-[32px] bg-fit"
@@ -220,21 +195,7 @@
           <div
             style="background-image: url('../media/grass.png')"
             class="w-[32px] h-[32px] bg-fit"
-          >
-            <button
-              class="w-full h-full flex items-center justify-center bg-transparent"
-              wf-onclick="post('game.attemptClick', '7x3')"
-              wf-class="{{Math.abs(state.game.char.x - 7) &lt;= state.game.interactionRange &amp;&amp; Math.abs(state.game.char.y - 3) &lt;= state.game.interactionRange ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'}}"
-              type="button"
-              value=""
-            >
-              <img
-                class="pointer-events-none"
-                src="../media/key_table.png"
-                wf-src="state.game.table"
-              />
-            </button>
-          </div>
+          ></div>
           <div
             style="background-image: url('../media/grass.png')"
             class="w-[32px] h-[32px] bg-fit"
@@ -314,7 +275,13 @@
           <div
             style="background-image: url('../media/grass.png')"
             class="w-[32px] h-[32px] bg-fit"
-          ></div>
+          >
+            <img
+              class="absolute w-[32px] h-[32px]"
+              src="../media/char.png"
+              wf-class="{{`left-[${(state.game.char.x - 1) * 32}px]`}} {{`top-[${(state.game.char.y - 1) * 32}px]`}}"
+            />
+          </div>
           <div
             style="background-image: url('../media/grass.png')"
             class="w-[32px] h-[32px] bg-fit"
@@ -381,44 +348,7 @@
           ></div>
         </div>
       </div>
-      <div class="flex justify-center pb-10">
-        <div class="flex flex-col items-center gap-2">
-          <button
-            type="button"
-            class="px-4 py-2 rounded bg-slate-800 text-white text-sm shadow"
-            wf-onclick="post('game.moveUp')"
-            value=""
-          >
-            Move Up
-          </button>
-          <div class="flex gap-2">
-            <button
-              type="button"
-              class="px-4 py-2 rounded bg-slate-800 text-white text-sm shadow"
-              wf-onclick="post('game.moveLeft')"
-              value=""
-            >
-              Move Left
-            </button>
-            <button
-              type="button"
-              class="px-4 py-2 rounded bg-slate-800 text-white text-sm shadow"
-              wf-onclick="post('game.moveDown')"
-              value=""
-            >
-              Move Down
-            </button>
-            <button
-              type="button"
-              class="px-4 py-2 rounded bg-slate-800 text-white text-sm shadow"
-              wf-onclick="post('game.moveRight')"
-              value=""
-            >
-              Move Right
-            </button>
-          </div>
-        </div>
-      </div>
+      <div class="text-green-800 text-center">{{state.game.log}}</div>
     </div>
   </body>
 </html>
