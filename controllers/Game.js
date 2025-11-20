@@ -1,4 +1,4 @@
-import agentic from '../other/agentic.js';
+import agentic from '../other/agentic_grok.js';
 import confetti from 'https://esm.sh/canvas-confetti';
 
 let tap = x => (console.log(x), x);
@@ -10,12 +10,15 @@ export default class Game {
       door: {
         coords: '6x2',
         greased: false,
+        powered: false,
         open: false,
         img: () => 'media/door.png',
         interact: () => {
           let { door } = this.state.objects;
           if (this.state.inventory.includes('grease_can')) { door.greased = true; this.state.inventory.splice(this.state.inventory.indexOf('grease_can'), 1) }
+          if (door.open) return `The door is already open, sunshine pours through the gap.`;
           if (!door.greased) return `The door is rusty and needs some grease to move.`;
+          if (!door.powered) return `A dormant mechanism keeps the door sealed. Maybe powering the nearby panel will wake it up.`;
           if (!this.state.inventory.includes('door_key')) return `You've greased the door so it can now move freely, but you lack the proper key to open it.`;
           door.open = true;
           return `You've open the door and solved the puzzle!`;
@@ -66,6 +69,54 @@ export default class Game {
           return `You take the Chest Key from the table.`;
         },
       },
+      bookshelf: {
+        coords: '2x3',
+        dusterTaken: false,
+        img: () => this.state.objects.bookshelf.dusterTaken ? 'media/bookshelf_empty.png' : 'media/bookshelf.png',
+        interact: () => {
+          let { bookshelf } = this.state.objects;
+          if (bookshelf.dusterTaken) return `Only dusty spines remain on the shelf.`;
+          bookshelf.dusterTaken = true;
+          this.state.inventory.push('feather_duster');
+          return `You rummage through the shelf and find a Feather Duster hidden between two tomes.`;
+        },
+      },
+      painting: {
+        coords: '9x2',
+        cleaned: false,
+        codeTaken: false,
+        img: () => {
+          let { painting } = this.state.objects;
+          if (!painting.cleaned) return 'media/painting_dirty.png';
+          return 'media/painting_revealed.png';
+        },
+        interact: () => {
+          let { painting } = this.state.objects;
+          if (!painting.cleaned) {
+            if (!this.state.inventory.includes('feather_duster')) return `The canvas is buried under grime. You can barely make out any details.`;
+            painting.cleaned = true;
+            return `You clean the painting, revealing faint glowing numerals beneath the dust.`;
+          }
+          if (painting.codeTaken) return `You've already memorized the shining sequence etched into the paint.`;
+          painting.codeTaken = true;
+          this.state.inventory.push('panel_code');
+          return `The digits 4-2-6 shimmer. You jot the code down to use elsewhere.`;
+        },
+      },
+      panel: {
+        coords: '10x4',
+        active: false,
+        img: () => this.state.objects.panel.active ? 'media/panel_on.png' : 'media/panel_off.png',
+        interact: () => {
+          let { panel, door } = this.state.objects;
+          if (panel.active) return `The panel already hums with steady energy.`;
+          if (!this.state.inventory.includes('panel_code')) return `A keypad awaits the right code. Maybe look around for a hint.`;
+          panel.active = true;
+          door.powered = true;
+          this.state.inventory.splice(this.state.inventory.indexOf('panel_code'), 1);
+          return `You key in the code. Lights flare as the door's locking mechanism powers up.`;
+        },
+      },
     },
     char: { x: 6, y: 6 },
     grid: { cols: 11, rows: 7 },
@@ -75,8 +126,9 @@ export default class Game {
     let tx = this.state.char.x + dx;
     let ty = this.state.char.y + dy;
     console.log(tx, ty, this.state.grid.cols, this.state.grid.rows);
-    if (tx < 0 || tx >= this.state.grid.cols) return `You're trying to move offbounds.`;
-    if (ty < 0 || ty >= this.state.grid.rows) return `You're trying to move offbounds.`;
+    if (tx < 1 || tx >= this.state.grid.cols) return `You're trying to move offbounds.`;
+    if (ty < 1 || ty >= this.state.grid.rows) return `You're trying to move offbounds.`;
+    if ([...Object.values(this.state.objects)].find(x => x.coords === `${tx}x${ty}`)) return `An object is in your way.`;
     this.state.char.x = tx;
     this.state.char.y = ty;
     return `Your new position is ${this.state.char.x}x${this.state.char.y}.`;
@@ -84,14 +136,16 @@ export default class Game {
 
   actions = {
     init: async () => {
-      await agentic('gpt-5.1', [{
+      await agentic('grok-3', [{
         role: 'system',
         content: () => [
           `You're a puzzle solver. Your goal is to open the door by finding the right items!`,
           `The Y-axis runs donwards.`,
           `Don't wander aimlessly. Solving the puzle requires interacting with existing objects.`,
           `To solve the possible quickly, interact with objects as soon as new tools become available. Some objects require multiple interactions.`,
+          `The exit is clogged by rust and a powerless mechanism—restore both movement and energy before presenting the key.`,
           `${this.state.char.x}x${this.state.char.y} is your starting position.`,
+          `Your inventory: ${JSON.stringify(this.state.inventory)}`,
           ...[...Object.entries(this.state.objects)].map(([id, obj]) => {
             let s =`There's a ${id} at ${obj.coords}.`;
             if (id === 'rug' && obj.lifted && !obj.keyTaken) s += ` A key is hiding underneath.`;

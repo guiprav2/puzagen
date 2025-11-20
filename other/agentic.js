@@ -5,7 +5,7 @@ let tap = x => (console.log(x), x);
 export default async function agentic(model, messages, tools) {
   async function step() {
     let ctools = buildCleanTools(tools);
-    await new Promise(pres => setTimeout(pres, 1000));
+    await new Promise(pres => setTimeout(pres, 200));
     const response = await fetch("https://api.openai.com/v1/responses", {
       method: "POST",
       headers: {
