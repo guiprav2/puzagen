@@ -4,6 +4,11 @@ export default class Game {
   	chest: 'media/closest_chest.png',
     table: 'media/key_table.png',
     char: { x: 0, y: 0 },
+    clickCoords: {
+      '3x3': 'clickChest',
+      '5x3': 'clickCarpet',
+      '7x3': 'clickTable',
+    },
   };
 
   actions = {

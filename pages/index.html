@@ -24,7 +24,13 @@
         <div
           style="background-image: url('../media/grass.png')"
           class="w-[32px] h-[32px] bg-fit"
-        ></div>
+        >
+          <img
+            class="absolute w-[32px] h-[32px]"
+            src="../media/char.png"
+            wf-class="{{`left-[${state.game.char.x * 32}px]`}} {{`top-[${state.game.char.y * 32}px]`}}"
+          />
+        </div>
         <div
           style="background-image: url('../media/grass.png')"
           class="w-[32px] h-[32px] bg-fit"
@@ -271,13 +277,7 @@
         <div
           style="background-image: url('../media/grass.png')"
           class="w-[32px] h-[32px] bg-fit"
-        >
-          <img
-            class="absolute w-[32px] h-[32px]"
-            src="../media/char.png"
-            wf-class="{{`left-[${state.game.char.x * 32}px]`}} {{`top-[${state.game.char.y * 32}px]`}}"
-          />
-        </div>
+        ></div>
         <div
           style="background-image: url('../media/grass.png')"
           class="w-[32px] h-[32px] bg-fit"
