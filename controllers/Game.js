@@ -3,6 +3,7 @@ export default class Game {
     inventory: [],
   	chest: 'media/closest_chest.png',
     table: 'media/key_table.png',
+    char: { x: 0, y: 0 },
   };
 
   actions = {
