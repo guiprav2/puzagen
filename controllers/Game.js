@@ -1,4 +1,4 @@
-import autoassist from 'https://esm.sh/@camilaprav/kittygpt/autoassist.js'
+import agentic from '../other/agentic.js';
 
 export default class Game {
   state = {
@@ -46,32 +46,43 @@ export default class Game {
 
   actions = {
     init: async () => {
-      let s = await autoassist({
-        endpoint: 'https://kittygpt.netlify.app/.netlify/functions/voicechat',
-        navdisable: true,
-        idtrack: true,
-        llm: true,
-      });
-
-      s.sysupdate({
-        main: `You're a puzzle solver. Have at it!`,
-      });
+      await agentic('gpt-4o-mini', [{ role: 'system', content: `You're a puzzle solver. Move around and figure it out!` }], [{
+        type: 'function',
+        name: 'moveLeft',
+        handler: async () => await post('game.moveLeft'),
+      }, {
+        type: 'function',
+        name: 'moveRight',
+        handler: async () => await post('game.moveRight'),
+      }, {
+        type: 'function',
+        name: 'moveUp',
+        handler: async () => await post('game.moveUp'),
+      }, {
+        type: 'function',
+        name: 'moveDown',
+        handler: async () => await post('game.moveDown'),
+      }]);
     },
 
     moveUp: () => {
       this.moveCharacter(0, -1);
+      return `You're now at ${this.state.char.x}x${this.state.char.y}`;
     },
 
     moveDown: () => {
       this.moveCharacter(0, 1);
+      return `You're now at ${this.state.char.x}x${this.state.char.y}`;
     },
 
     moveLeft: () => {
       this.moveCharacter(-1, 0);
+      return `You're now at ${this.state.char.x}x${this.state.char.y}`;
     },
 
     moveRight: () => {
       this.moveCharacter(1, 0);
+      return `You're now at ${this.state.char.x}x${this.state.char.y}`;
     },
 
     attemptClick: coordKey => {
